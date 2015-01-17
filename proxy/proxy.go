@@ -73,26 +73,26 @@ func ProxyToStatsD(incomingData []byte) error {
 }
 
 func proxyToSingleStatsD(devolved []byte, statsdTarget targetSpec) error {
-	log.Debug("Proxying devolved data to StatsD at %s: %s", statsdTarget, devolved)
+	log.Debug("Proxying devolved data to StatsD at %+v: %s", statsdTarget, devolved)
 	ip, err := statsdTarget.getIP()
 	if err != nil {
-		log.Warning("%s", err)
+		log.Warning("Error getting IP from spec %+v: %s", statsdTarget, err)
 		return err
 	}
 
 	udpAddr := net.UDPAddr{IP: ip, Port: statsdTarget.Port}
 	sock, err := net.DialUDP("udp4", nil, &udpAddr)
 	if err != nil {
-		log.Warning("%s", err)
+		log.Warning("Error opening UDP socket for address %+v: %s", udpAddr, err)
 		return err
 	}
 	defer sock.Close()
 
 	bytesWritten, err := sock.Write(devolved)
 	if err != nil {
-		log.Warning("%s", err)
+		log.Warning("Error writing to socket for address %s: %s", udpAddr, err)
 		return err
 	}
-	log.Debug("Wrote %d bytes to %s", bytesWritten, udpAddr)
+	log.Debug("Wrote %d bytes to %+v", bytesWritten, udpAddr)
 	return nil
 }
