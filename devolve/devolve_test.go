@@ -52,5 +52,5 @@ func (s *DevolveTestSuite) TestDevolveWithDogStatsDEvent(c *C) {
 	in := "_e{10,50}:Cataclysm!:Literally everything exploded and you died, sorry."
 	result, err := Devolve(in)
 	c.Assert(result, Equals, "")
-	c.Assert(err, IsNil)
+	c.Assert(err, NotNil)
 }

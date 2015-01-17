@@ -42,9 +42,7 @@ func initLogger() error {
 func handleData(incomingData []byte) {
 	log.Debug("Received: %s", incomingData)
 	go proxy.ProxyToDogStatsD(incomingData)
-	for _, target := range proxy.STATSD_TARGETS {
-		go proxy.ProxyToStatsD(incomingData, target)
-	}
+	go proxy.ProxyToStatsD(incomingData)
 }
 
 func initSocket() (*net.UDPConn, error) {

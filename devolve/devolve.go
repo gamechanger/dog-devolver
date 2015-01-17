@@ -14,7 +14,7 @@ var dogstatsdEventPattern = regexp.MustCompile(`_e{\d+,\d+}`)
 // if it is a DataDog event, we return "".
 func Devolve(in string) (string, error) {
 	if dogstatsdEventPattern.FindString(in) != "" {
-		return "", nil
+		return "", errors.New("Received DataDog event, not StatsD compatible")
 	}
 
 	split := strings.SplitN(in, "|", 3)

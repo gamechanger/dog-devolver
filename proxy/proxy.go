@@ -6,15 +6,30 @@ import (
 	"strconv"
 
 	"github.com/gamechanger/dog-devolver/config"
+	"github.com/gamechanger/dog-devolver/devolve"
 	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("dog-devolver")
 
+var statsdTargets = zipTargets(config.STATSD_HOSTS, config.STATSD_PORTS)
+
 type targetSpec struct {
 	IP   net.IP
 	Host string
 	Port int
+}
+
+func (spec targetSpec) getIP() (net.IP, error) {
+	if spec.IP != nil {
+		return spec.IP, nil
+	}
+	addrs, err := net.LookupIP(spec.Host)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Resolved IP %s for name %s", addrs[0], spec.Host)
+	return addrs[0], nil
 }
 
 func zipTargets(hosts, ports []string) []targetSpec {
@@ -44,9 +59,40 @@ func ProxyToDogStatsD(incomingData []byte) error {
 	return nil
 }
 
-func ProxyToStatsD(incomingData []byte, statsdTarget targetSpec) error {
-	log.Debug("Proxying devolved data to StatsD at %s: %s", statsdTarget, incomingData)
+func ProxyToStatsD(incomingData []byte) error {
+	devolved, err := devolve.Devolve(string(incomingData))
+	if err != nil {
+		return err
+	}
+
+	devolvedBytes := []byte(devolved)
+	for _, target := range statsdTargets {
+		go proxyToSingleStatsD(devolvedBytes, target)
+	}
 	return nil
 }
 
-var STATSD_TARGETS = zipTargets(config.STATSD_HOSTS, config.STATSD_PORTS)
+func proxyToSingleStatsD(devolved []byte, statsdTarget targetSpec) error {
+	log.Debug("Proxying devolved data to StatsD at %s: %s", statsdTarget, devolved)
+	ip, err := statsdTarget.getIP()
+	if err != nil {
+		log.Warning("%s", err)
+		return err
+	}
+
+	udpAddr := net.UDPAddr{IP: ip, Port: statsdTarget.Port}
+	sock, err := net.DialUDP("udp4", nil, &udpAddr)
+	if err != nil {
+		log.Warning("%s", err)
+		return err
+	}
+	defer sock.Close()
+
+	bytesWritten, err := sock.Write(devolved)
+	if err != nil {
+		log.Warning("%s", err)
+		return err
+	}
+	log.Debug("Wrote %d bytes to %s", bytesWritten, udpAddr)
+	return nil
+}
