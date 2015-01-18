@@ -74,6 +74,7 @@ func zipTargets(hosts, ports []string) []targetSpec {
 }
 
 func ProxyToDogStatsD(msg string) error {
+	log.Debug("Proxying unaltered data to DogStatsD: %s", msg)
 	ip, port, err := parseAddress(config.DOGSTATSD_HOST, config.DOGSTATSD_PORT, true)
 	if err != nil {
 		log.Warning("Error in resolving DogStatsD address: %s", err)
@@ -86,6 +87,7 @@ func ProxyToDogStatsD(msg string) error {
 		log.Warning("Error opening UDP socket for address %+v: %s", udpAddr, err)
 		return err
 	}
+	defer sock.Close()
 
 	bytesWritten, err := sock.Write([]byte(msg))
 	if err != nil {
@@ -93,7 +95,7 @@ func ProxyToDogStatsD(msg string) error {
 		return err
 	}
 
-	log.Debug("Wrote %d bytes to DogStatsD", bytesWritten)
+	log.Debug("Successfully wrote %d bytes to DogStatsD", bytesWritten)
 	return nil
 }
 
@@ -132,6 +134,6 @@ func proxyToSingleStatsD(devolved []byte, statsdTarget targetSpec) error {
 		log.Warning("Error writing to socket for address %s: %s", udpAddr, err)
 		return err
 	}
-	log.Debug("Wrote %d bytes to %+v", bytesWritten, udpAddr)
+	log.Debug("Successfully wrote %d bytes to %+v", bytesWritten, udpAddr)
 	return nil
 }

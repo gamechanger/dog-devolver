@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net"
 	"os"
@@ -43,6 +44,9 @@ func initLogger() error {
 func handleData(incomingData []byte) {
 	log.Debug("Received: %s", incomingData)
 	for _, msg := range strings.Split(string(incomingData), "\n") {
+		// Gotta do this so that we don't send all the empty bytes
+		// from the end of our UDP buffer
+		msg = string(bytes.Trim([]byte(msg), "\x00"))
 		go proxy.ProxyToDogStatsD(msg)
 		go proxy.ProxyToStatsD(msg)
 	}
