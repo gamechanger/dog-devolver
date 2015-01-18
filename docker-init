@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export DOCKERHOST=$(/sbin/ip route | awk '/default/ {print $3}')
+
+export DOG_DEVOLVER_DOGSTATSD_HOST=$DOCKERHOST
+
+./dog-devolver
