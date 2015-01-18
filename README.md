@@ -14,7 +14,7 @@ Then you stick Dog Devolver in the middle, and then your life is like this:
 
 DataDog is really cool, but there are also some neat tools like [Skyline](https://github.com/etsy/skyline) that are part of a StatsD-specific ecosystem. DogStatsD uses a modified StatsD format, plus it jealously guards the packets it receives and doesn't give you a way to easily forward them. Dog Devolver solves this problem for you, because when it comes to choosing between DataDog and Skyline...
 
-![Why not both?](http://i.imgur.com/r3jMYTn.jpg)
+<img src="http://i.imgur.com/r3jMYTn.jpg" width=200></img>
 
 ### Running Dog Devolver
 
