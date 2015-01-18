@@ -9,7 +9,6 @@ script:
   - go build -v
   - go test -v
   - go vet
-  - errcheck -ignore 'Close|[wW]rite.*|[rR]ead.*' -blank github.com/gamechanger/dog-devolver
   - tests_complete dog-devolver
 notify:
   webhook:
