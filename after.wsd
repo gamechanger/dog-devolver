@@ -1,0 +1,14 @@
+title With Dog Devolver
+
+participant App as A
+participant Dog Devolver as D
+participant DogStatsD as DS
+participant DataDog.com as Dog
+participant StatsD as S
+
+note over S: You can configure\nmultiple StatsD targets
+
+A->D: DogStats-compatible metric\nwith tags and things
+D->DS: Unaltered DogStats-compatible metric
+D->S: "Devolved" StatsD-compatible versions\nof your metrics
+DS->Dog: Believes it is still\njealously hording data

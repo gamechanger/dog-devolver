@@ -1,0 +1,8 @@
+title Before Dog Devolver
+
+participant App as A
+participant DogStatsD as DS
+participant DataDog.com as Dog
+
+A->DS: DogStats-compatible metric\nwith tags and things
+DS->Dog: Jealously hordes data
