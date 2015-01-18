@@ -35,16 +35,16 @@ func (s *DevolveTestSuite) TestDevolveWithStatsDCounter(c *C) {
 }
 
 func (s *DevolveTestSuite) TestDevolveWithDogStatsDCounterPartial(c *C) {
-	in := "my.metric:1|c|0.1"
+	in := "my.metric:1|c|@0.1"
 	result, err := Devolve(in)
-	c.Assert(result, Equals, "my.metric:1|c")
+	c.Assert(result, Equals, "my.metric:1|c|@0.1")
 	c.Assert(err, IsNil)
 }
 
 func (s *DevolveTestSuite) TestDevolveWithDogStatsDCounterFull(c *C) {
-	in := "my.metric:1|c|0.1|#env:production,1420"
+	in := "my.metric:1|c|@0.1|#env:production,1420"
 	result, err := Devolve(in)
-	c.Assert(result, Equals, "my.metric:1|c")
+	c.Assert(result, Equals, "my.metric:1|c|@0.1")
 	c.Assert(err, IsNil)
 }
 
