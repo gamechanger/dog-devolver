@@ -20,6 +20,24 @@ type targetSpec struct {
 	Port int
 }
 
+func parseAddress(host string, portString string, lookup bool) (net.IP, int, error) {
+	ip := net.ParseIP(host)
+	port, err := strconv.Atoi(portString)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if ip == nil && lookup == true {
+		ips, err := net.LookupIP(host)
+		ip = ips[0]
+		if err != nil {
+			return nil, 0, err
+		}
+	}
+
+	return ip, port, nil
+}
+
 func (spec targetSpec) getIP() (net.IP, error) {
 	if spec.IP != nil {
 		return spec.IP, nil
@@ -32,6 +50,8 @@ func (spec targetSpec) getIP() (net.IP, error) {
 	return addrs[0], nil
 }
 
+// Take the StatsD hosts and ports from config and merge them
+// into a slice of targetSpecs
 func zipTargets(hosts, ports []string) []targetSpec {
 	var result []targetSpec
 	for idx, host := range hosts {
@@ -39,10 +59,9 @@ func zipTargets(hosts, ports []string) []targetSpec {
 			return result
 		}
 
-		ip := net.ParseIP(host)
-		port, err := strconv.Atoi(ports[idx])
+		ip, port, err := parseAddress(host, ports[idx], true)
 		if err != nil {
-			panic(fmt.Sprintf("Invalid port spec %s", ports[idx]))
+			panic(fmt.Sprintf("Invalid IP (%s) or port (%s) spec, got error: %s", host, ports[idx], err))
 		}
 
 		if ip == nil {
@@ -54,14 +73,34 @@ func zipTargets(hosts, ports []string) []targetSpec {
 	return result
 }
 
-func ProxyToDogStatsD(incomingData []byte) error {
-	log.Debug("Proxying to DogStatsD: %s", incomingData)
+func ProxyToDogStatsD(msg string) error {
+	ip, port, err := parseAddress(config.DOGSTATSD_HOST, config.DOGSTATSD_PORT, true)
+	if err != nil {
+		log.Warning("Error in resolving DogStatsD address: %s", err)
+		return err
+	}
+
+	udpAddr := net.UDPAddr{IP: ip, Port: port}
+	sock, err := net.DialUDP("udp4", nil, &udpAddr)
+	if err != nil {
+		log.Warning("Error opening UDP socket for address %+v: %s", udpAddr, err)
+		return err
+	}
+
+	bytesWritten, err := sock.Write([]byte(msg))
+	if err != nil {
+		log.Warning("Error writing to DogStatsD socket: %s", err)
+		return err
+	}
+
+	log.Debug("Wrote %d bytes to DogStatsD", bytesWritten)
 	return nil
 }
 
-func ProxyToStatsD(incomingData []byte) error {
-	devolved, err := devolve.Devolve(string(incomingData))
+func ProxyToStatsD(msg string) error {
+	devolved, err := devolve.Devolve(msg)
 	if err != nil {
+		log.Warning("Error in devolving message %s. Error was: %s", msg, err)
 		return err
 	}
 

@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gamechanger/dog-devolver/config"
 	"github.com/gamechanger/dog-devolver/proxy"
@@ -41,8 +42,10 @@ func initLogger() error {
 
 func handleData(incomingData []byte) {
 	log.Debug("Received: %s", incomingData)
-	go proxy.ProxyToDogStatsD(incomingData)
-	go proxy.ProxyToStatsD(incomingData)
+	for _, msg := range strings.Split(string(incomingData), "\n") {
+		go proxy.ProxyToDogStatsD(msg)
+		go proxy.ProxyToStatsD(msg)
+	}
 }
 
 func initSocket() (*net.UDPConn, error) {
