@@ -4,7 +4,9 @@ git:
 env:
   - REPO=/var/cache/drone/src/github.com/gamechanger/dog-devolver
 script:
-  - cd $REPO
+  - mkdir -p $GOPATH/src/github.com/gamechanger/dog-devolver
+  - cp -R $REPO/* $GOPATH/src/github.com/gamechanger/dog-devolver
+  - cd $GOPATH/src/github.com/gamechanger/dog-devolver
   - godep restore
   - go build -v
   - go test -v
