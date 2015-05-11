@@ -12,7 +12,6 @@ script:
   - go test -v
   - go vet
   - errcheck -blank -ignore "[p|P]roxyTo*|Close|[wW]rite.*|[rR]ead.*" $(go list ./...)
-  - tests_complete dog-devolver
 notify:
   webhook:
     urls:
