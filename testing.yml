@@ -1,8 +1,6 @@
 image: docker.gamechanger.io/go1.3.1
 git:
   depth: 10
-env:
-  - REPO=/var/cache/drone/src/github.com/gamechanger/dog-devolver
 script:
   - mkdir -p $GOPATH/src/github.com/gamechanger/dog-devolver
   - cp -R $REPO/* $GOPATH/src/github.com/gamechanger/dog-devolver
