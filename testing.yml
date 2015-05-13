@@ -1,6 +1,4 @@
 image: docker.gamechanger.io/go1.3.1
-git:
-  depth: 10
 script:
   - mkdir -p $GOPATH/src/github.com/gamechanger/dog-devolver
   - cp -R $REPO/* $GOPATH/src/github.com/gamechanger/dog-devolver
@@ -10,9 +8,3 @@ script:
   - go test -v
   - go vet
   - errcheck -blank -ignore "[p|P]roxyTo*|Close|[wW]rite.*|[rR]ead.*" $(go list ./...)
-notify:
-  webhook:
-    urls:
-      - http://localhost:7777/webhook
-    on_success: true
-    on_failure: true
