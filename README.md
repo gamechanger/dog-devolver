@@ -1,5 +1,7 @@
 # dog-devolver
 
+**WARNING: This project is currently a proof of concept and should never be allowed near any sort of production environment.**
+
 Dog Devolver is a DogStatsD proxy and StatsD-compatible devolving forwarder. You send your client traffic directly to Dog Devolver. It will then send fully-formed DogStatsD-compatible packets to your DogStatsD client. It'll also send StatsD-compatible versions of those packets to any StatsDs that you want.
 
 Look, I probably explained that poorly. Here are some fancy charts. Here's your life now:
